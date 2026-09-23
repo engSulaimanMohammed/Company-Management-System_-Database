@@ -1,98 +1,72 @@
-CREATE DATABASE CompanyDB;
-GO
 
-USE CompanyDB;
-GO
+create database CompanyDB
 
+use CompanyDB
 
 
-CREATE TABLE Department (
-    DNum INT PRIMARY KEY,
-    DName VARCHAR(50) NOT NULL UNIQUE,
-    ManagerSSN INT NULL,
-    HireDate DATE NULL
-);
+create table Employee
+(
+	Fname nvarchar(20) not null,
+	Lname nvarchar(20) not null,
+	Ssn int primary key,
+	Bdate date,
+	Gender bit default 0,
+	Super_ssn int,
+	foreign key (Super_ssn) references Employee(Ssn)
+)
 
 
-
-CREATE TABLE Employee (
-    SSN INT PRIMARY KEY,
-    FName VARCHAR(50) NOT NULL,
-    LName VARCHAR(50) NOT NULL,
-    Gender CHAR(1),
-    BirthDate DATE,
-
-    DNum INT NOT NULL,
-    SupervisorSSN INT NULL,
-
-    FOREIGN KEY (DNum)
-        REFERENCES Department(DNum),
-
-    FOREIGN KEY (SupervisorSSN)
-        REFERENCES Employee(SSN)
-);
+create table Department
+(
+	Dname nvarchar(20) not null,
+	Dnumber int primary key,
+	Mgr_ssn int,
+	Mgr_start_date date not null,
+	foreign key (Mgr_ssn) references Employee(Ssn)
+)
 
 
+create table Dept_Location
+(
+	Dnumber int,
+	Dlocation nvarchar(100),
+	foreign key (Dnumber) references Department(Dnumber),
+	primary key (Dnumber, Dlocation)
+)
 
 
-ALTER TABLE Department
-ADD CONSTRAINT FK_Department_Manager
-FOREIGN KEY (ManagerSSN)
-REFERENCES Employee(SSN);
+create table Project
+(
+	Pname nvarchar(50) not null,
+	Pnumber int primary key,
+	Plocation nvarchar(100) not null,
+	City nvarchar(100),
+	Dnum int,
+	foreign key (Dnum) references Department(Dnumber)
+)
 
 
+create table Works_on
+(
+	Essn int,
+	Pno int,
+	Hrs int not null,
+	foreign key (Essn) references Employee(Ssn),
+	foreign key (Pno) references Project(Pnumber),
+	primary key (Essn, Pno)
+)
 
 
-CREATE TABLE Project (
-    PNumber INT PRIMARY KEY,
-    PName VARCHAR(50) NOT NULL,
-    Location VARCHAR(50),
-    City VARCHAR(50),
-
-    DNum INT NOT NULL,
-
-    FOREIGN KEY (DNum)
-        REFERENCES Department(DNum)
-);
+create table EmployeeDependent
+(
+	Essn int,
+	Dependent_name nvarchar(50) not null,
+	Gender bit default 0,
+	Bdate date,
+	foreign key (Essn) references Employee(Ssn),
+	primary key (Essn, Dependent_name)
+)
 
 
-CREATE TABLE Works_On (
-    SSN INT,
-    PNumber INT,
-    WorkingHours DECIMAL(5,2),
-
-    PRIMARY KEY (SSN, PNumber),
-
-    FOREIGN KEY (SSN)
-        REFERENCES Employee(SSN),
-
-    FOREIGN KEY (PNumber)
-        REFERENCES Project(PNumber)
-);
-
-
-
-
-CREATE TABLE Dependent (
-    SSN INT,
-    DependentName VARCHAR(50),
-    Gender CHAR(1),
-    BirthDate DATE,
-
-    PRIMARY KEY (SSN, DependentName),
-
-    FOREIGN KEY (SSN)
-        REFERENCES Employee(SSN)
-);
-
-
-
-CREATE TABLE Department_Location (
-    DNum INT,
-    Location VARCHAR(50),
-
-    PRIMARY KEY (DNum, Location),
-
-    FOREIGN KEY (DNum)
-        REFERENCES Department(DNum)
-);
+alter table Employee
+add Dno int foreign key references Department(Dnumber)
